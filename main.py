@@ -1,7 +1,7 @@
 import os
 import asyncio
 from pyrogram import Client, filters
-from pytgcalls import PyTgCalls
+from pytgcalls import PyTgCalls, StreamType
 from pytgcalls.types.input_stream import AudioPiped
 
 # Bot configuration
@@ -38,6 +38,7 @@ async def play_radio(client, message):
         await pytgcalls.join_group_call(
             CHAT_ID,
             AudioPiped(STREAM_URL),
+            stream_type=StreamType().local_stream,
         )
         await message.reply_text("🎵 **Radio started!** Now streaming RekTerapy Radio")
     except Exception as e:
@@ -54,8 +55,8 @@ async def stop_radio(client, message):
 @app.on_message(filters.command("status"))
 async def radio_status(client, message):
     try:
-        is_playing = pytgcalls.get_call(CHAT_ID)
-        status = "🟢 **Playing**" if is_playing else "🔴 **Stopped**"
+        call = pytgcalls.get_call(CHAT_ID)
+        status = "🟢 **Playing**" if call else "🔴 **Stopped**"
         await message.reply_text(f"📻 **Radio Status:** {status}")
     except Exception as e:
         await message.reply_text(f"❌ **Error:** {str(e)}")
