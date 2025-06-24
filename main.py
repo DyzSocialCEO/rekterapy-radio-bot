@@ -1,8 +1,8 @@
 import os
 import asyncio
 from pyrogram import Client, filters
-from pytgcalls import PyTgCalls, StreamType
-from pytgcalls.types.input_stream import AudioPiped
+from pytgcalls import PyTgCalls
+from pytgcalls.types import AudioPiped
 
 # Bot configuration
 API_ID = int(os.environ.get("API_ID", "6"))
@@ -20,7 +20,7 @@ app = Client(
 )
 
 # Initialize PyTgCalls
-pytgcalls = PyTgCalls(app)
+tgcalls = PyTgCalls(app)
 
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
@@ -35,10 +35,9 @@ async def start_command(client, message):
 @app.on_message(filters.command("play"))
 async def play_radio(client, message):
     try:
-        await pytgcalls.join_group_call(
+        await tgcalls.join_group_call(
             CHAT_ID,
-            AudioPiped(STREAM_URL),
-            stream_type=StreamType().local_stream,
+            AudioPiped(STREAM_URL)
         )
         await message.reply_text("🎵 **Radio started!** Now streaming RekTerapy Radio")
     except Exception as e:
@@ -47,7 +46,7 @@ async def play_radio(client, message):
 @app.on_message(filters.command("stop"))
 async def stop_radio(client, message):
     try:
-        await pytgcalls.leave_group_call(CHAT_ID)
+        await tgcalls.leave_group_call(CHAT_ID)
         await message.reply_text("⏹️ **Radio stopped**")
     except Exception as e:
         await message.reply_text(f"❌ **Error:** {str(e)}")
@@ -55,17 +54,17 @@ async def stop_radio(client, message):
 @app.on_message(filters.command("status"))
 async def radio_status(client, message):
     try:
-        call = pytgcalls.get_call(CHAT_ID)
-        status = "🟢 **Playing**" if call else "🔴 **Stopped**"
+        is_connected = CHAT_ID in tgcalls.active_calls
+        status = "🟢 **Playing**" if is_connected else "🔴 **Stopped**"
         await message.reply_text(f"📻 **Radio Status:** {status}")
     except Exception as e:
         await message.reply_text(f"❌ **Error:** {str(e)}")
 
 async def main():
     await app.start()
-    await pytgcalls.start()
+    await tgcalls.start()
     print("🎵 Radio bot started successfully!")
-    await pytgcalls.idle()
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     asyncio.run(main())
