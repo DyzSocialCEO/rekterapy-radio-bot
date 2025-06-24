@@ -2,7 +2,7 @@ import os
 import asyncio
 from pyrogram import Client, filters
 from pytgcalls import PyTgCalls
-from pytgcalls.types.input_stream import AudioParameters, AudioPiped
+from pytgcalls.types.input_stream import AudioPiped
 
 # Bot configuration
 API_ID = int(os.environ.get("API_ID", "6"))
@@ -37,12 +37,7 @@ async def play_radio(client, message):
     try:
         await pytgcalls.join_group_call(
             CHAT_ID,
-            AudioPiped(
-                STREAM_URL,
-                AudioParameters(
-                    bitrate=48000,
-                ),
-            ),
+            AudioPiped(STREAM_URL),
         )
         await message.reply_text("🎵 **Radio started!** Now streaming RekTerapy Radio")
     except Exception as e:
